@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111e"><link rel="manifest" href="manifest.webmanifest">
+<title>RONNIE Budget Planner</title>
+<style>
+:root{--bg:#07111e;--panel:#0d1b2b;--line:#1d344b;--text:#eef5ff;--muted:#9bb0c8;--green:#00c98a;--red:#ff647c;--gold:#ffc33d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#112943 0,#07111e 55%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:16px 14px 90px;max-width:760px;margin:auto}
+header{display:flex;align-items:center;gap:12px;margin:8px 0 20px}.logo{width:52px;height:52px;border:2px solid var(--gold);border-radius:16px;display:grid;place-items:center;color:var(--gold);font-size:25px}h1{font-size:21px;margin:0}header p{margin:2px 0 0;color:var(--muted);font-size:12px}
+select,input,button{font:inherit}select,input{width:100%;background:#081523;color:var(--text);border:1px solid #29425d;border-radius:10px;padding:12px;outline:none}label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px}.monthrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:linear-gradient(145deg,#10243a,#0a1725);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}.wide{grid-column:1/-1}.kicker{color:var(--muted);font-size:12px}.num{font-size:22px;font-weight:800;margin-top:5px;overflow-wrap:anywhere}.green{color:var(--green)}.red{color:var(--red)}.gold{color:var(--gold)}
+button{border:0;border-radius:11px;padding:12px 14px;font-weight:750;cursor:pointer}.primary{background:linear-gradient(90deg,#00b879,#00d69a);color:#042018;width:100%}.secondary{background:#152a40;color:var(--text);border:1px solid #2b4560}.danger{background:#321b2a;color:#ff9cac}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 10px}.sectionhead h2{font-size:16px;margin:0}.items{display:grid;gap:8px}.item{display:flex;align-items:center;gap:10px;padding:12px;background:#0b1928;border:1px solid var(--line);border-radius:12px}.emoji{font-size:21px;width:34px;height:34px;display:grid;place-items:center;background:#152c41;border-radius:10px}.itemmain{min-width:0;flex:1}.itemname{font-weight:700;overflow-wrap:anywhere}.sub{font-size:11px;color:var(--muted);margin-top:3px}.itemright{text-align:right;white-space:nowrap}.amount{font-weight:800}.pending{font-size:10px;color:var(--gold);margin-top:3px}.actions{display:flex;gap:6px;margin-top:6px}.actions button{padding:5px 8px;font-size:11px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.formgrid .full{grid-column:1/-1}.hint{font-size:12px;color:var(--muted);line-height:1.5}.empty{color:var(--muted);text-align:center;padding:20px}.footer{color:#7188a2;text-align:center;font-size:11px;margin-top:24px}.bar{height:9px;background:#1a3047;border-radius:99px;overflow:hidden;margin-top:10px}.bar span{display:block;height:100%;background:var(--green);border-radius:99px}.tabs{display:flex;gap:8px;margin:18px 0}.tabs button{flex:1;padding:10px 4px}.hidden{display:none!important}
+@media(max-width:380px){body{padding:12px 10px 80px}.num{font-size:19px}.card{padding:11px}.formgrid{grid-template-columns:1fr}.formgrid .full{grid-column:auto}}
+</style>
+</head>
+<body>
+<header><div class="logo">♛</div><div><h1>RONNIE <span class="gold">Budget Planner</span></h1><p>Apna Paisa · Apna Plan · Apna Future</p></div></header>
+<div class="monthrow"><div><label>Budget month</label><input id="month" type="month"></div><div><label>Monthly income (₹)</label><input id="income" type="number" min="0" step="1" value="22000"></div></div>
+<div class="grid">
+ <div class="card"><div class="kicker">Total income</div><div class="num green" id="totalIncome">₹22,000</div></div>
+ <div class="card"><div class="kicker">Paid / planned expenses</div><div class="num red" id="totalExpense">₹22,100</div></div>
+ <div class="card"><div class="kicker">Money left</div><div class="num" id="left">−₹100</div></div>
+ <div class="card"><div class="kicker">Pending bills</div><div class="num gold" id="pendingTotal">₹1,000</div></div>
+ <div class="card wide"><div class="kicker">Budget used</div><div class="bar"><span id="bar" style="width:100%"></span></div><p class="hint" id="budgetHint">Income ke andar rehne ki koshish karein.</p></div>
+</div>
+<div class="tabs"><button class="primary" id="showExpenses">Expenses</button><button class="secondary" id="showAdd">+ Add item</button><button class="secondary" id="exportBtn">Export CSV</button></div>
+
+
+<section class="card" style="margin-top:18px">
+ <div class="sectionhead"><h2>🎯 Monthly Target & Savings</h2></div>
+ <div class="formgrid">
+  <div><label>Is month kitna paisa chahiye? (₹)</label><input id="monthlyTarget" type="number" min="0" step="1" placeholder="30000"></div>
+  <div><label>Expected daily extra income (₹)</label><input id="expectedDaily" type="number" min="0" step="1" placeholder="500"></div>
+  <div class="full"><button class="primary" id="saveGoals" type="button">Target save karein</button></div>
+ </div>
+ <div class="grid" style="margin-top:12px">
+  <div class="card"><div class="kicker">Monthly target</div><div class="num gold" id="targetDisplay">₹0</div></div>
+  <div class="card"><div class="kicker">Target se kitna baaki</div><div class="num" id="targetGap">₹0</div></div>
+  <div class="card wide"><div class="kicker">Expected extra income this month</div><div class="num green" id="expectedMonthly">₹0</div><div class="hint">Daily expectation × is month ke din. Ye estimate hai, guaranteed income nahi.</div></div>
+ </div>
+</section>
+<section class="card" style="margin-top:18px">
+ <div class="sectionhead"><h2>🗓️ Daily kharcha & day plan</h2></div>
+ <div class="formgrid">
+  <div><label>Date</label><input id="planDate" type="date"></div>
+  <div><label>Aaj ka kharcha (₹)</label><input id="dailySpend" type="number" min="0" step="1" placeholder="150"></div>
+  <div class="full"><label>Aaj ka plan / task</label><input id="planText" maxlength="180" placeholder="Jaise: rent dena, 500 extra income try karna"></div>
+  <div class="full"><button class="primary" id="savePlan" type="button">Daily plan & kharcha save karein</button></div>
+ </div>
+ <div class="sectionhead"><h2>Daily plan history</h2></div>
+ <div class="items" id="planItems"></div>
+</section>
+<section class="card" style="margin-top:18px">
+ <div class="sectionhead"><h2>🤝 Kisi ko paise diye / wapas lene hain</h2></div>
+ <div class="formgrid">
+  <div><label>Kis ko diye?</label><input id="lendName" maxlength="60" placeholder="Naam"></div>
+  <div><label>Amount (₹)</label><input id="lendAmount" type="number" min="1" step="1" placeholder="1000"></div>
+  <div><label>Paise diye kab?</label><input id="lendDate" type="date"></div>
+  <div><label>Wapas kab lene hain?</label><input id="lendDue" type="date"></div>
+  <div class="full"><label>Note (optional)</label><input id="lendNote" maxlength="100" placeholder="UPI / cash / note"></div>
+  <div class="full"><button class="primary" id="saveLend" type="button">Lending entry save karein</button></div>
+ </div>
+ <div class="sectionhead"><h2>Recovery / return list</h2></div>
+ <div class="items" id="lendItems"></div>
+ <p class="hint">Jab paise wapas mil jaayein, “Returned” mark karein. Yeh list monthly budget se alag record hai.</p>
+</section>
+
+<section class="card" id="dailySection" style="margin-top:18px">
+ <div class="sectionhead"><h2>📈 Daily Extra Income / Loss</h2></div>
+ <div class="formgrid">
+  <div><label>Date</label><input id="dailyDate" type="date"></div>
+  <div><label>Type</label><select id="dailyType"><option value="income">➕ Extra Income</option><option value="loss">📉 Loss</option></select></div>
+  <div><label>Amount (₹)</label><input id="dailyAmount" type="number" min="1" step="1" placeholder="500" required></div>
+  <div><label>Note (optional)</label><input id="dailyNote" maxlength="80" placeholder="Jaise side income"></div>
+  <div class="full"><button class="primary" id="addDaily" type="button">+ Aaj ka entry save karein</button></div>
+ </div>
+ <div class="grid" style="margin-top:12px">
+  <div class="card"><div class="kicker">Extra income</div><div class="num green" id="dailyIncomeTotal">₹0</div></div>
+  <div class="card"><div class="kicker">Total loss</div><div class="num red" id="dailyLossTotal">₹0</div></div>
+  <div class="card wide"><div class="kicker">Net extra result</div><div class="num" id="dailyNet">₹0</div><div class="hint">Net = extra income − loss. Ye monthly salary se alag track hota hai.</div></div>
+ </div>
+ <div class="sectionhead"><h2>Daily history</h2></div>
+ <div class="items" id="dailyItems"></div>
+</section>
+
+<section id="expenseSection">
+<div class="sectionhead"><h2>Is mahine ke kharche</h2><button class="secondary" id="resetBtn">Reset month</button></div>
+<div class="items" id="items"></div>
+</section>
+<section id="addSection" class="card hidden">
+<div class="sectionhead"><h2 id="formTitle">Naya item add karein</h2><button class="secondary" id="cancelBtn">Cancel</button></div>
+<form id="itemForm">
+<div class="formgrid">
+<div class="full"><label>Naam</label><input id="name" required maxlength="60" placeholder="Jaise room rent"></div>
+<div><label>Amount (₹)</label><input id="amount" type="number" min="0" step="1" required placeholder="500"></div>
+<div><label>Category</label><select id="category"><option>🏠 Room / rent</option><option>🏡 Ghar / family</option><option>💳 Loan / EMI</option><option>📱 Phone / bill</option><option>🤝 Dost / personal</option><option>🍲 Food</option><option>🚕 Travel</option><option>🧾 Other</option></select></div>
+<div><label>Payment status</label><select id="status"><option value="paid">Is mahine dena hai</option><option value="pending">Agle mahine dena hai</option></select></div>
+<div><label>Due month (if pending)</label><input id="dueMonth" type="month"></div>
+<div class="full"><button class="primary" type="submit">Save item</button></div>
+</div></form><p class="hint">Pending item ko current-month expenses se alag dikhaya jayega. Data isi browser/device mein save hota hai.</p>
+</section>
+<div class="footer">RONNIE Budget Planner · Personal budget stays on this device</div>
+<script>
+const $=id=>document.getElementById(id), fmt=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n||0);
+const now=new Date(); const defaultMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+let currentMonth=defaultMonth, editingId=null, store={};
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const starter=[
+ {id:'rent',name:'Room rent',amount:5000,category:'🏠 Room / rent',status:'paid'},
+ {id:'uncle',name:'Chacha',amount:500,category:'🤝 Dost / personal',status:'paid'},
+ {id:'home',name:'Ghar',amount:10000,category:'🏡 Ghar / family',status:'paid'},
+ {id:'friend',name:'Dost',amount:2000,category:'🤝 Dost / personal',status:'paid'},
+ {id:'phone',name:'Postpaid',amount:1000,category:'📱 Phone / bill',status:'pending',dueMonth:nextMonth(defaultMonth)},
+ {id:'loan',name:'Loan / EMI',amount:2600,category:'💳 Loan / EMI',status:'paid'},
+ {id:'other',name:'Kisi aur ko',amount:2000,category:'🧾 Other',status:'paid'}
+];
+function nextMonth(m){let [y,mo]=m.split('-').map(Number);let d=new Date(y,mo,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function load(){try{store=JSON.parse(localStorage.getItem('ronnieBudgetData')||'{}')}catch{store={}}if(!store[currentMonth])store[currentMonth]={income:22000,items:currentMonth===defaultMonth?structuredClone(starter):[],daily:[]};if(!store[currentMonth].daily)store[currentMonth].daily=[];if(!store[currentMonth].plans)store[currentMonth].plans=[];if(!store[currentMonth].lends)store[currentMonth].lends=[];if(!store[currentMonth].goals)store[currentMonth].goals={target:0,expectedDaily:0};}
+function save(){localStorage.setItem('ronnieBudgetData',JSON.stringify(store))}
+function render(){load();const data=store[currentMonth];$('income').value=data.income;$('totalIncome').textContent=fmt(data.income);
+const active=data.items.filter(x=>x.status!=='pending'),pending=data.items.filter(x=>x.status==='pending');
+const expenses=active.reduce((s,x)=>s+Number(x.amount),0),pendingSum=pending.reduce((s,x)=>s+Number(x.amount),0),left=Number(data.income)-expenses;
+$('totalExpense').textContent=fmt(expenses);$('left').textContent=(left<0?'−':'')+fmt(Math.abs(left));$('left').className='num '+(left<0?'red':'green');$('pendingTotal').textContent=fmt(pendingSum);
+const pct=data.income?Math.min(100,expenses/data.income*100):0;$('bar').style.width=pct+'%';$('budgetHint').textContent=left<0?`Budget ₹${fmt(Math.abs(left)).replace('₹','')} se zyada hai. Kuch kharcha adjust karein.`:`Aapke paas ${fmt(left)} bache hain (pending bills alag).`;
+$('items').innerHTML='';if(!data.items.length){$('items').innerHTML='<div class="empty">Abhi koi item nahi. “+ Add item” se shuru karein.</div>';return}
+data.items.forEach(x=>{const el=document.createElement('div');el.className='item';let emoji=(x.category||'🧾').split(' ')[0];el.innerHTML=`<div class="emoji">${emoji}</div><div class="itemmain"><div class="itemname"></div><div class="sub"></div><div class="actions"><button class="secondary edit">Edit</button><button class="danger delete">Delete</button><button class="secondary toggle">${x.status==='pending'?'Mark paid':'Mark pending'}</button></div></div><div class="itemright"><div class="amount ${x.status==='pending'?'gold':'red'}">${fmt(x.amount)}</div><div class="pending">${x.status==='pending'?'Pending · '+(x.dueMonth||'next month'):'This month'}</div></div>`;el.querySelector('.itemname').textContent=x.name;el.querySelector('.sub').textContent=x.category||'Other';el.querySelector('.edit').onclick=()=>openForm(x.id);el.querySelector('.delete').onclick=()=>{if(confirm('Is item ko delete karein?')){data.items=data.items.filter(y=>y.id!==x.id);save();render()}};el.querySelector('.toggle').onclick=()=>{x.status=x.status==='pending'?'paid':'pending';if(x.status==='pending'&&!x.dueMonth)x.dueMonth=nextMonth(currentMonth);save();render()};$('items').appendChild(el)});renderDaily()}
+
+
+function renderExtras(){
+ const d=store[currentMonth],g=d.goals||{target:0,expectedDaily:0};
+ $('monthlyTarget').value=g.target||'';$('expectedDaily').value=g.expectedDaily||'';
+ $('targetDisplay').textContent=fmt(g.target||0);
+ const net=(g.target||0)-(Number(d.income||0)+(d.daily||[]).filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0)-(d.daily||[]).filter(x=>x.type==='loss').reduce((s,x)=>s+Number(x.amount),0));
+ $('targetGap').textContent=(net>0?'−':'')+fmt(Math.abs(net));$('targetGap').className='num '+(net>0?'red':'green');
+ const days=new Date(Number(currentMonth.slice(0,4)),Number(currentMonth.slice(5,7)),0).getDate();$('expectedMonthly').textContent=fmt((g.expectedDaily||0)*days);
+ $('planItems').innerHTML='';const plans=[...(d.plans||[])].sort((a,b)=>b.date.localeCompare(a.date));
+ if(!plans.length)$('planItems').innerHTML='<div class="empty">Daily plan abhi add nahi hai.</div>';
+ plans.forEach(x=>{const el=document.createElement('div');el.className='item';el.innerHTML='<div class="emoji">🗓️</div><div class="itemmain"><div class="itemname"></div><div class="sub"></div><div class="actions"><button class="danger delete">Delete</button></div></div><div class="itemright"><div class="amount red"></div></div>';el.querySelector('.itemname').textContent=x.text||'Day plan';el.querySelector('.sub').textContent=x.date;el.querySelector('.amount').textContent='Spend '+fmt(x.spend||0);el.querySelector('.delete').onclick=()=>{d.plans=d.plans.filter(y=>y.id!==x.id);save();render()};$('planItems').appendChild(el)});
+ $('lendItems').innerHTML='';const lends=[...(d.lends||[])].sort((a,b)=>(a.returned?1:0)-(b.returned?1:0)||(a.due||'').localeCompare(b.due||''));
+ if(!lends.length)$('lendItems').innerHTML='<div class="empty">Abhi kisi ko diye hue paise record nahi hain.</div>';
+ lends.forEach(x=>{const el=document.createElement('div');el.className='item';el.innerHTML='<div class="emoji">🤝</div><div class="itemmain"><div class="itemname"></div><div class="sub"></div><div class="actions"><button class="secondary toggle"></button><button class="danger delete">Delete</button></div></div><div class="itemright"><div class="amount gold"></div></div>';el.querySelector('.itemname').textContent=x.name+(x.returned?' · Returned':'');el.querySelector('.sub').textContent='Diye: '+x.date+' · Wapas: '+(x.due||'date set nahi')+(x.note?' · '+x.note:'');el.querySelector('.amount').textContent=fmt(x.amount);el.querySelector('.toggle').textContent=x.returned?'Mark pending':'Returned';el.querySelector('.toggle').onclick=()=>{x.returned=!x.returned;save();render()};el.querySelector('.delete').onclick=()=>{d.lends=d.lends.filter(y=>y.id!==x.id);save();render()};$('lendItems').appendChild(el)})
+}
+$('planDate').value=todayISO();$('lendDate').value=todayISO();
+$('saveGoals').onclick=()=>{const d=store[currentMonth];d.goals={target:Math.max(0,Number($('monthlyTarget').value)||0),expectedDaily:Math.max(0,Number($('expectedDaily').value)||0)};save();render()};
+$('savePlan').onclick=()=>{const date=$('planDate').value||todayISO();if(!date.startsWith(currentMonth)){alert('Date selected budget month ke andar honi chahiye.');return}const d=store[currentMonth];d.plans.push({id:'p'+Date.now(),date,spend:Math.max(0,Number($('dailySpend').value)||0),text:$('planText').value.trim()});save();$('dailySpend').value='';$('planText').value='';render()};
+$('saveLend').onclick=()=>{const name=$('lendName').value.trim(),amount=Number($('lendAmount').value);if(!name||amount<1){alert('Naam aur amount bharein.');return}const d=store[currentMonth];d.lends.push({id:'l'+Date.now(),name,amount,date:$('lendDate').value||todayISO(),due:$('lendDue').value,note:$('lendNote').value.trim(),returned:false});save();$('lendName').value='';$('lendAmount').value='';$('lendDue').value='';$('lendNote').value='';render()};
+
+function renderDaily(){
+ const d=store[currentMonth];if(!d)return;const entries=d.daily||[];
+ const ins=entries.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0);
+ const losses=entries.filter(x=>x.type==='loss').reduce((s,x)=>s+Number(x.amount),0),net=ins-losses;
+ $('dailyIncomeTotal').textContent=fmt(ins);$('dailyLossTotal').textContent=fmt(losses);
+ $('dailyNet').textContent=(net<0?'−':'')+fmt(Math.abs(net));$('dailyNet').className='num '+(net<0?'red':'green');
+ $('dailyItems').innerHTML='';const sorted=[...entries].sort((a,b)=>b.date.localeCompare(a.date));
+ if(!sorted.length){$('dailyItems').innerHTML='<div class="empty">Is month ki daily entry abhi nahi hai.</div>';return}
+ sorted.forEach(x=>{const el=document.createElement('div');el.className='item';el.innerHTML=`<div class="emoji">${x.type==='income'?'💰':'📉'}</div><div class="itemmain"><div class="itemname"></div><div class="sub"></div><div class="actions"><button class="danger delete">Delete</button></div></div><div class="itemright"><div class="amount ${x.type==='income'?'green':'red'}">${x.type==='income'?'+':'−'}${fmt(x.amount)}</div></div>`;el.querySelector('.itemname').textContent=x.note|| (x.type==='income'?'Extra income':'Loss');el.querySelector('.sub').textContent=x.date;el.querySelector('.delete').onclick=()=>{if(confirm('Daily entry delete karein?')){d.daily=d.daily.filter(y=>y.id!==x.id);save();render()}};$('dailyItems').appendChild(el)})
+}
+$('dailyDate').value=todayISO();
+$('addDaily').onclick=()=>{const amount=Number($('dailyAmount').value);if(!amount||amount<1){alert('Amount ₹1 ya usse zyada daalein.');return}
+ const d=store[currentMonth];const date=$('dailyDate').value||todayISO();
+ if(!date.startsWith(currentMonth)){alert('Date selected budget month ke andar honi chahiye. Pehle budget month badlein.');return}
+ d.daily.push({id:'d'+Date.now(),date,type:$('dailyType').value,amount,note:$('dailyNote').value.trim()});save();$('dailyAmount').value='';$('dailyNote').value='';render()
+};
+
+function openForm(id){editingId=id;const x=id?store[currentMonth].items.find(y=>y.id===id):null;$('formTitle').textContent=x?'Item edit karein':'Naya item add karein';$('name').value=x?.name||'';$('amount').value=x?.amount||'';$('category').value=x?.category||'🧾 Other';$('status').value=x?.status||'paid';$('dueMonth').value=x?.dueMonth||nextMonth(currentMonth);$('expenseSection').classList.add('hidden');$('addSection').classList.remove('hidden')}
+function closeForm(){$('addSection').classList.add('hidden');$('expenseSection').classList.remove('hidden');$('itemForm').reset();editingId=null}
+$('month').value=currentMonth;$('month').addEventListener('change',()=>{currentMonth=$('month').value||defaultMonth;render()});
+$('income').addEventListener('change',()=>{store[currentMonth].income=Math.max(0,Number($('income').value)||0);save();render()});
+$('showAdd').onclick=()=>openForm(null);$('showExpenses').onclick=()=>{closeForm()};$('cancelBtn').onclick=closeForm;
+$('itemForm').addEventListener('submit',e=>{e.preventDefault();const x={id:editingId||('i'+Date.now()),name:$('name').value.trim(),amount:Number($('amount').value),category:$('category').value,status:$('status').value,dueMonth:$('dueMonth').value};if(!x.name||x.amount<0)return;const d=store[currentMonth];if(editingId){const i=d.items.findIndex(y=>y.id===editingId);if(i>=0)d.items[i]=x}else d.items.push(x);save();closeForm();render()});
+$('resetBtn').onclick=()=>{if(confirm('Is mahine ke saare items reset kar dein?')){store[currentMonth]={income:22000,items:[]};save();render()}};
+$('exportBtn').onclick=()=>{const d=store[currentMonth];const rows=[['Month',currentMonth],['Income',d.income],[],['Name','Amount','Category','Status','Due month'],...d.items.map(x=>[x.name,x.amount,x.category,x.status,x.dueMonth||'']),[],['Daily entries'],['Date','Type','Amount','Note'],...(d.daily||[]).map(x=>[x.date,x.type,x.amount,x.note||'']),[],['Daily plans'],['Date','Spend','Plan'],...(d.plans||[]).map(x=>[x.date,x.spend,x.text]),[],['Money lent'],['Name','Amount','Given date','Return due','Returned','Note'],...(d.lends||[]).map(x=>[x.name,x.amount,x.date,x.due,x.returned?'yes':'no',x.note||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ronnie-budget-${currentMonth}.csv`;a.click();URL.revokeObjectURL(a.href)};
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+render();
+</script>
+</body></html>

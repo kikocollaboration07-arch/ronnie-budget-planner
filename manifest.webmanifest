@@ -1,0 +1,9 @@
+{
+  "name": "RONNIE Budget Planner",
+  "short_name": "RONNIE Budget",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07111e",
+  "theme_color": "#07111e",
+  "description": "Monthly income and expense planner"
+}
