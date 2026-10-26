@@ -2,8 +2,21 @@
   "name": "RONNIE Budget Planner",
   "short_name": "RONNIE Budget",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#07111e",
   "theme_color": "#07111e",
-  "description": "Monthly income and expense planner"
+  "description": "Monthly income and expense planner",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
